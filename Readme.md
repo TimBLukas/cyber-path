@@ -138,6 +138,12 @@ cargo test
 
 ---
 
+## To Do's
+
+- Path Generation
+- Player Movements
+- Scoring System
+
 ## License
 
 MIT License.
