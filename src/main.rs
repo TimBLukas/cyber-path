@@ -9,7 +9,7 @@ use crossterm::{
     style::Color,
     terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
 };
-use std::io::{stdout, Stdout};
+use std::io::{Stdout, stdout};
 use std::thread;
 use std::time::Duration;
 
@@ -110,17 +110,15 @@ fn show_failure(
 ) -> Result<()> {
     let current = game.path[game.player_index];
     if let Some(wrong) = current.neighbor(dir)
-        && wrong.x < game.cols && wrong.y < game.rows
+        && wrong.x < game.cols
+        && wrong.y < game.rows
     {
         board.fill_cell(stdout, wrong, Color::Red)?;
     }
     for &pos in game.remaining_path() {
         board.fill_cell(stdout, pos, Color::DarkYellow)?;
     }
-    let msg = format!(
-        "Wrong! Round {} over. (R)estart or (Q)uit",
-        game.round
-    );
+    let msg = format!("Wrong! Round {} over. (R)estart or (Q)uit", game.round);
     board.draw_status(stdout, &msg, Color::Red)?;
     Ok(())
 }

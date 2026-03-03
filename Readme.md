@@ -2,6 +2,7 @@
 
 A terminal-based memory game written in Rust.
 The player is shown a path on a rectangular board. After a short preview phase, the path disappears and must be reproduced from memory.
+Every round the path gets longer!
 
 ---
 
@@ -97,8 +98,6 @@ Game parameters can be adjusted via constants or configuration module:
 
 ## Dependencies
 
-Typical dependencies:
-
 ```toml
 crossterm = "0.27"
 rand = "0.8"
@@ -140,12 +139,6 @@ cargo test
 - Sound feedback (optional terminal bell)
 
 ---
-
-## To Do's
-
-- Path Generation
-- Player Movements
-- Scoring System
 
 ## License
 
