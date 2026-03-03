@@ -1,6 +1,4 @@
-use anyhow::Result;
-
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Direction {
     Up,
     Down,
@@ -8,44 +6,35 @@ pub enum Direction {
     Right,
 }
 
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct Position {
-    pub x: i32,
-    pub y: i32,
+    pub x: u16,
+    pub y: u16,
 }
 
 impl Position {
-    pub fn new(x: i32, y: i32) -> Self {
-        Position { x, y }
+    pub fn new(x: u16, y: u16) -> Self {
+        Self { x, y }
     }
 
-    pub fn move_horizontal(&mut self, amount: i32) -> Result<()> {
-        if (self.x + amount) > 0 {
-            self.x += amount;
-        }
-
-        Ok(())
-    }
-
-    pub fn move_vertical(&mut self, amount: i32) -> Result<()> {
-        if (self.y + amount) > 0 {
-            self.y += amount;
-        }
-
-        Ok(())
-    }
-
-    pub fn get_next_position(&self, direction: Direction) -> Self {
+    pub fn neighbor(self, direction: Direction) -> Option<Self> {
         match direction {
-            Direction::Up => Position::new(self.x, self.y + 1),
-            Direction::Down => Position::new(self.x, self.y - 1),
-            Direction::Left => Position::new(self.x - 1, self.y),
-            Direction::Right => Position::new(self.x + 1, self.y),
+            Direction::Up => self.y.checked_sub(1).map(|y| Self::new(self.x, y)),
+            Direction::Down => Some(Self::new(self.x, self.y + 1)),
+            Direction::Left => self.x.checked_sub(1).map(|x| Self::new(x, self.y)),
+            Direction::Right => Some(Self::new(self.x + 1, self.y)),
         }
     }
-}
 
-pub enum Field {
-    Filled,
-    Empty,
+    pub fn direction_to(self, other: Self) -> Option<Direction> {
+        let dx = i32::from(other.x) - i32::from(self.x);
+        let dy = i32::from(other.y) - i32::from(self.y);
+        match (dx, dy) {
+            (0, -1) => Some(Direction::Up),
+            (0, 1) => Some(Direction::Down),
+            (-1, 0) => Some(Direction::Left),
+            (1, 0) => Some(Direction::Right),
+            _ => None,
+        }
+    }
 }

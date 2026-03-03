@@ -28,11 +28,14 @@ The player is shown a path on a rectangular board. After a short preview phase, 
 
 ## Controls
 
-| Key        | Action       |
-| ---------- | ------------ |
-| Arrow Keys | Move cursor  |
-| Enter      | Confirm step |
-| q          | Quit game    |
+| Key              | Action     |
+| ---------------- | ---------- |
+| W / ↑            | Move up    |
+| A / ←            | Move left  |
+| S / ↓            | Move down  |
+| D / →            | Move right |
+| Q / Esc          | Quit game  |
+| R (after defeat) | Restart    |
 
 ---
 
