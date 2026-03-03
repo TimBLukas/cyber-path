@@ -6,6 +6,24 @@ Every round the path gets longer!
 
 ---
 
+## Screenshots
+
+<p align="center">
+  <img src="assets/input-phase.png" alt="Preview phase" width="600">
+  <br><em>Input - phase: Waiting for an input!</em>
+</p>
+
+<p align="center">
+  <img src="assets/correct-path.png" alt="Input phase" width="600">
+  <br><em>Correct Path – Path was recreated correct!</em>
+</p>
+
+<p align="center">
+  <img src="assets/wrong-path.png" alt="Input phase" width="600">
+  <br><em>Wrong Path - Path was recreated incorrectly!</em>
+</p>
+---
+
 ## Features
 
 - Grid-based board rendered with Unicode box-drawing characters
