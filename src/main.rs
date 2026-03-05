@@ -9,6 +9,10 @@ use crossterm::{
     style::Color,
     terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
 };
+use kira::{
+    AudioManager, AudioManagerSettings, DefaultBackend, Tween,
+    sound::static_sound::{StaticSoundData, StaticSoundHandle},
+};
 use std::io::{Stdout, stdout};
 use std::thread;
 use std::time::Duration;
@@ -36,6 +40,7 @@ fn main() {
 
 fn run() -> Result<()> {
     let mut stdout = stdout();
+    let mut manager = AudioManager::<DefaultBackend>::new(AudioManagerSettings::default())?;
 
     terminal::enable_raw_mode()?;
     execute!(stdout, EnterAlternateScreen, cursor::Hide)?;
@@ -43,6 +48,12 @@ fn run() -> Result<()> {
 
     let board = Board::from_terminal()?;
     let mut game = Game::new(board.cols, board.rows);
+
+    let winning_sound = StaticSoundData::from_file("assets/winning_sound.mp3")?;
+    let losing_sound = StaticSoundData::from_file("assets/losing_sound.mp3")?;
+    let moving_sound = StaticSoundData::from_file("assets/movement.mp3")?;
+    let bot_sound = StaticSoundData::from_file("assets/bot_path.mp3")?;
+    let mut move_handle: Option<StaticSoundHandle> = None;
 
     'game: loop {
         game.generate_path()?;
@@ -53,7 +64,10 @@ fn run() -> Result<()> {
         board.draw_round_info(&mut stdout, game.round, game.move_count())?;
         board.draw_status(&mut stdout, "Watch the path...", Color::Yellow)?;
 
-        board.animate_path(&mut stdout, &game.path, game.preview_step_ms())?;
+        board.animate_path(&mut stdout, &game.path, game.preview_step_ms(), || {
+            manager.play(bot_sound.clone())?;
+            Ok(())
+        })?;
         thread::sleep(Duration::from_millis(game.preview_hold_ms()));
 
         board.clear_path(&mut stdout, &game.path)?;
@@ -70,11 +84,16 @@ fn run() -> Result<()> {
                 Input::Move(dir) => match game.check_move(dir) {
                     MoveResult::Correct(pos) => {
                         board.fill_cell(&mut stdout, pos, Color::Green)?;
+                        if let Some(ref mut h) = move_handle {
+                            h.stop(Tween::default());
+                        }
+                        move_handle = Some(manager.play(moving_sound.clone())?);
                     }
                     MoveResult::RoundComplete => {
                         if let Some(&last) = game.path.last() {
                             board.fill_cell(&mut stdout, last, Color::Green)?;
                         }
+                        manager.play(winning_sound.clone())?;
                         board.draw_status(
                             &mut stdout,
                             "Correct! Press any key for the next round...",
@@ -85,6 +104,7 @@ fn run() -> Result<()> {
                         continue 'game;
                     }
                     MoveResult::Wrong => {
+                        manager.play(losing_sound.clone())?;
                         show_failure(&mut stdout, &board, &game, dir)?;
                         match input::read_post_round()? {
                             PostRoundInput::PlayAgain => {

@@ -151,11 +151,13 @@ impl Board {
         stdout: &mut Stdout,
         path: &[Position],
         step_ms: u64,
+        mut on_step: impl FnMut() -> Result<()>,
     ) -> Result<()> {
         let delay = Duration::from_millis(step_ms);
         for (i, &pos) in path.iter().enumerate() {
             let color = if i == 0 { Color::Cyan } else { Color::Green };
             self.fill_cell(stdout, pos, color)?;
+            on_step()?;
             thread::sleep(delay);
         }
         Ok(())
