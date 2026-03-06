@@ -32,6 +32,7 @@ Every round the path gets longer!
 - Keyboard-controlled movement
 - Immediate validation of player input
 - Clean terminal rendering using alternate screen buffer
+- Sounds for bot movement, player movement, winning and losing
 
 ---
 
