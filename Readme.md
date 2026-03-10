@@ -155,7 +155,7 @@ cargo test
 - Increasing difficulty levels
 - Persistent high scores
 - Color highlighting
-- Sound feedback (optional terminal bell)
+- New Gamemode (chase / get chased)
 
 ---
 
