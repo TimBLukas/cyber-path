@@ -26,6 +26,12 @@ impl Position {
         }
     }
 
+    pub fn manhattan_distance(self, other: Self) -> u32 {
+        let dx = (i32::from(self.x) - i32::from(other.x)).unsigned_abs();
+        let dy = (i32::from(self.y) - i32::from(other.y)).unsigned_abs();
+        dx + dy
+    }
+
     pub fn direction_to(self, other: Self) -> Option<Direction> {
         let dx = i32::from(other.x) - i32::from(self.x);
         let dy = i32::from(other.y) - i32::from(self.y);
