@@ -170,8 +170,7 @@ impl Board {
         Ok(())
     }
 
-    pub fn draw_title(&self, stdout: &mut Stdout) -> Result<()> {
-        let title = "CYBER PATH";
+    pub fn draw_title(&self, stdout: &mut Stdout, title: &str) -> Result<()> {
         let x = self.term_w.saturating_sub(title.len() as u16) / 2;
         queue!(
             stdout,
@@ -194,6 +193,30 @@ impl Board {
             stdout,
             cursor::MoveTo(x, row),
             style::PrintStyledContent(text.with(color))
+        )?;
+        stdout.flush()?;
+        Ok(())
+    }
+
+    pub fn draw_chase_info(
+        &self,
+        stdout: &mut Stdout,
+        round: u32,
+        survived: u32,
+        target: u32,
+        bot_steps: u32,
+    ) -> Result<()> {
+        let info = format!(
+            "Round {}  |  {}/{}  survived  |  Bot speed: {}  |  Q to quit",
+            round, survived, target, bot_steps
+        );
+        let row = self.status_row() + 1;
+        queue!(
+            stdout,
+            cursor::MoveTo(0, row),
+            style::Print(" ".repeat(self.term_w as usize)),
+            cursor::MoveTo(self.term_w.saturating_sub(info.len() as u16) / 2, row),
+            style::PrintStyledContent(info.with(Color::DarkGrey))
         )?;
         stdout.flush()?;
         Ok(())
