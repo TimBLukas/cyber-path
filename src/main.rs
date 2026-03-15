@@ -2,12 +2,14 @@ mod chase;
 mod game;
 mod input;
 mod models;
+mod snake;
 mod ui;
 
 use anyhow::Result;
 use clap::{Parser, ValueEnum};
 use crossterm::{
     cursor, execute,
+    event::{self, Event, KeyCode, KeyEventKind},
     style::Color,
     terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -17,11 +19,13 @@ use kira::{
 };
 use std::io::{Stdout, stdout};
 use std::thread;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use chase::{ChaseGame, ChaseMoveResult};
 use game::{Game, MoveResult};
 use input::{Input, PostRoundInput};
+use models::Direction;
+use snake::{SnakeGame, SnakeMoveResult};
 use ui::Board;
 
 #[derive(Parser)]
@@ -38,6 +42,8 @@ enum Mode {
     Path,
     /// Flee from a chasing bot
     Chase,
+    /// Collect coins and grow your snake
+    Snake,
 }
 
 /// Restores terminal state on drop, even during panics.
@@ -72,6 +78,7 @@ fn run() -> Result<()> {
     match cli.mode {
         Mode::Path => run_path_mode(&mut stdout, &mut manager, &board),
         Mode::Chase => run_chase_mode(&mut stdout, &mut manager, &board),
+        Mode::Snake => run_snake_mode(&mut stdout, &mut manager, &board),
     }
 }
 
@@ -254,6 +261,101 @@ fn run_chase_mode(
                         continue 'game;
                     }
                 },
+            }
+        }
+    }
+
+    Ok(())
+}
+
+fn run_snake_mode(
+    stdout: &mut Stdout,
+    manager: &mut AudioManager<DefaultBackend>,
+    board: &Board,
+) -> Result<()> {
+    let coin_sound = StaticSoundData::from_file("assets/winning_sound.mp3")?;
+    let losing_sound = StaticSoundData::from_file("assets/losing_sound.mp3")?;
+
+    let mut game = SnakeGame::new(board.cols, board.rows);
+
+    'game: loop {
+        execute!(stdout, terminal::Clear(terminal::ClearType::All))?;
+        board.draw_title(stdout, "CYBER SNAKE")?;
+        board.draw_grid(stdout)?;
+
+        for (i, &pos) in game.body.iter().enumerate() {
+            let color = if i == 0 { Color::Cyan } else { Color::Green };
+            board.fill_cell(stdout, pos, color)?;
+        }
+        board.fill_cell(stdout, game.food, Color::Yellow)?;
+        board.draw_snake_info(stdout, game.score, game.level())?;
+        board.draw_status(stdout, "Collect coins! WASD / Arrow keys", Color::Yellow)?;
+
+        let mut last_tick = Instant::now();
+
+        loop {
+            let tick_duration = Duration::from_millis(game.tick_ms());
+            let remaining = tick_duration.saturating_sub(last_tick.elapsed());
+
+            if event::poll(remaining)? {
+                if let Event::Key(key) = event::read()? {
+                    if key.kind == KeyEventKind::Press {
+                        match key.code {
+                            KeyCode::Char('w' | 'W') | KeyCode::Up => {
+                                game.try_change_direction(Direction::Up);
+                            }
+                            KeyCode::Char('a' | 'A') | KeyCode::Left => {
+                                game.try_change_direction(Direction::Left);
+                            }
+                            KeyCode::Char('s' | 'S') | KeyCode::Down => {
+                                game.try_change_direction(Direction::Down);
+                            }
+                            KeyCode::Char('d' | 'D') | KeyCode::Right => {
+                                game.try_change_direction(Direction::Right);
+                            }
+                            KeyCode::Char('q') | KeyCode::Esc => break 'game,
+                            _ => {}
+                        }
+                    }
+                }
+            }
+
+            if last_tick.elapsed() >= tick_duration {
+                last_tick = Instant::now();
+                match game.tick() {
+                    SnakeMoveResult::Moved { tail_removed } => {
+                        board.clear_cell(stdout, tail_removed)?;
+                        if game.body.len() > 1 {
+                            board.fill_cell(stdout, game.body[1], Color::Green)?;
+                        }
+                        board.fill_cell(stdout, game.head(), Color::Cyan)?;
+                    }
+                    SnakeMoveResult::AteFood { new_food } => {
+                        if game.body.len() > 1 {
+                            board.fill_cell(stdout, game.body[1], Color::Green)?;
+                        }
+                        board.fill_cell(stdout, game.head(), Color::Cyan)?;
+                        board.fill_cell(stdout, new_food, Color::Yellow)?;
+                        manager.play(coin_sound.clone())?;
+                        board.draw_snake_info(stdout, game.score, game.level())?;
+                    }
+                    SnakeMoveResult::Collision => {
+                        board.fill_cell(stdout, game.head(), Color::Red)?;
+                        manager.play(losing_sound.clone())?;
+                        let msg = format!(
+                            "Game Over! Score: {} | (R)estart or (Q)uit",
+                            game.score
+                        );
+                        board.draw_status(stdout, &msg, Color::Red)?;
+                        match input::read_post_round()? {
+                            PostRoundInput::PlayAgain => {
+                                game.restart();
+                                continue 'game;
+                            }
+                            PostRoundInput::Quit => break 'game,
+                        }
+                    }
+                }
             }
         }
     }

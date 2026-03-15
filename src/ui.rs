@@ -222,6 +222,25 @@ impl Board {
         Ok(())
     }
 
+    pub fn draw_snake_info(
+        &self,
+        stdout: &mut Stdout,
+        score: u32,
+        level: u32,
+    ) -> Result<()> {
+        let info = format!("Score: {}  |  Level: {}  |  Q to quit", score, level);
+        let row = self.status_row() + 1;
+        queue!(
+            stdout,
+            cursor::MoveTo(0, row),
+            style::Print(" ".repeat(self.term_w as usize)),
+            cursor::MoveTo(self.term_w.saturating_sub(info.len() as u16) / 2, row),
+            style::PrintStyledContent(info.with(Color::DarkGrey))
+        )?;
+        stdout.flush()?;
+        Ok(())
+    }
+
     pub fn draw_round_info(&self, stdout: &mut Stdout, round: u32, moves: u32) -> Result<()> {
         let info = format!("Round {}  |  {} moves  |  Q to quit", round, moves);
         let row = self.status_row() + 1;
