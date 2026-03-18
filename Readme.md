@@ -1,8 +1,11 @@
-# Cyber Path – Terminal Game in Rust
+# Cyber Path – Terminal Games in Rust
 
-A terminal-based memory game written in Rust.
-The player is shown a path on a rectangular board. After a short preview phase, the path disappears and must be reproduced from memory.
-Every round the path gets longer!
+Several terminal-based games written in Rust.
+
+games:
+- The player is shown a path on a rectangular board. After a short preview phase, the path disappears and must be reproduced from memory. Every round the path gets longer!
+- The player is chased by an object an has to avoid it, the object gets better at tracking the player ervery round.
+- Snake: The classic snake game
 
 ---
 
