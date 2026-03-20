@@ -17,7 +17,7 @@ use kira::{
     AudioManager, AudioManagerSettings, DefaultBackend, Tween,
     sound::static_sound::{StaticSoundData, StaticSoundHandle},
 };
-use std::io::{Stdout, stdout};
+use std::io::{Stdout, stdout, Cursor};
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -27,6 +27,12 @@ use input::{Input, PostRoundInput};
 use models::Direction;
 use snake::{SnakeGame, SnakeMoveResult};
 use ui::Board;
+
+// Embedded audio assets
+const WINNING_MP3: &[u8] = include_bytes!("../assets/winning_sound.mp3");
+const LOSING_MP3: &[u8] = include_bytes!("../assets/losing_sound.mp3");
+const MOVEMENT_MP3: &[u8] = include_bytes!("../assets/movement.mp3");
+const BOT_PATH_MP3: &[u8] = include_bytes!("../assets/bot_path.mp3");
 
 #[derive(Parser)]
 #[command(name = "cyber-path", about = "A cyberpunk terminal game")]
@@ -89,10 +95,10 @@ fn run_path_mode(
 ) -> Result<()> {
     let mut game = Game::new(board.cols, board.rows);
 
-    let winning_sound = StaticSoundData::from_file("assets/winning_sound.mp3")?;
-    let losing_sound = StaticSoundData::from_file("assets/losing_sound.mp3")?;
-    let moving_sound = StaticSoundData::from_file("assets/movement.mp3")?;
-    let bot_sound = StaticSoundData::from_file("assets/bot_path.mp3")?;
+    let winning_sound = StaticSoundData::from_cursor(Cursor::new(WINNING_MP3.to_vec()))?;
+    let losing_sound = StaticSoundData::from_cursor(Cursor::new(LOSING_MP3.to_vec()))?;
+    let moving_sound = StaticSoundData::from_cursor(Cursor::new(MOVEMENT_MP3.to_vec()))?;
+    let bot_sound = StaticSoundData::from_cursor(Cursor::new(BOT_PATH_MP3.to_vec()))?;
     let mut move_handle: Option<StaticSoundHandle> = None;
 
     'game: loop {
@@ -167,9 +173,9 @@ fn run_chase_mode(
     manager: &mut AudioManager<DefaultBackend>,
     board: &Board,
 ) -> Result<()> {
-    let winning_sound = StaticSoundData::from_file("assets/winning_sound.mp3")?;
-    let losing_sound = StaticSoundData::from_file("assets/losing_sound.mp3")?;
-    let moving_sound = StaticSoundData::from_file("assets/movement.mp3")?;
+    let winning_sound = StaticSoundData::from_cursor(Cursor::new(WINNING_MP3.to_vec()))?;
+    let losing_sound = StaticSoundData::from_cursor(Cursor::new(LOSING_MP3.to_vec()))?;
+    let moving_sound = StaticSoundData::from_cursor(Cursor::new(MOVEMENT_MP3.to_vec()))?;
     let mut move_handle: Option<StaticSoundHandle> = None;
 
     let mut game = ChaseGame::new(board.cols, board.rows);
@@ -273,8 +279,8 @@ fn run_snake_mode(
     manager: &mut AudioManager<DefaultBackend>,
     board: &Board,
 ) -> Result<()> {
-    let coin_sound = StaticSoundData::from_file("assets/winning_sound.mp3")?;
-    let losing_sound = StaticSoundData::from_file("assets/losing_sound.mp3")?;
+    let coin_sound = StaticSoundData::from_cursor(Cursor::new(WINNING_MP3.to_vec()))?;
+    let losing_sound = StaticSoundData::from_cursor(Cursor::new(LOSING_MP3.to_vec()))?;
 
     let mut game = SnakeGame::new(board.cols, board.rows);
 
