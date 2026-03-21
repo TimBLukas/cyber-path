@@ -7,6 +7,11 @@ games:
 - The player is chased by an object an has to avoid it, the object gets better at tracking the player ervery round.
 - Snake: The classic snake game
 
+features:
+- different game modes
+- increasing difficulty
+- sounds
+
 ---
 
 ## Screenshots
