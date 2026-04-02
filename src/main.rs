@@ -1,4 +1,5 @@
 mod chase;
+mod flappy;
 mod game;
 mod input;
 mod models;
@@ -22,6 +23,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use chase::{ChaseGame, ChaseMoveResult};
+use flappy::{FlappyGame, FlappyMoveResult};
 use game::{Game, MoveResult};
 use input::{Input, PostRoundInput};
 use models::Direction;
@@ -50,6 +52,8 @@ enum Mode {
     Chase,
     /// Collect coins and grow your snake
     Snake,
+    /// Jump through pipes
+    Flappy,
 }
 
 /// Restores terminal state on drop, even during panics.
@@ -85,6 +89,7 @@ fn run() -> Result<()> {
         Mode::Path => run_path_mode(&mut stdout, &mut manager, &board),
         Mode::Chase => run_chase_mode(&mut stdout, &mut manager, &board),
         Mode::Snake => run_snake_mode(&mut stdout, &mut manager, &board),
+        Mode::Flappy => run_flappy_mode(&mut stdout, &mut manager, &board),
     }
 }
 
@@ -389,3 +394,106 @@ fn show_failure(
     board.draw_status(stdout, &msg, Color::Red)?;
     Ok(())
 }
+
+fn run_flappy_mode(
+    stdout: &mut Stdout,
+    manager: &mut AudioManager<DefaultBackend>,
+    board: &Board,
+) -> Result<()> {
+    let score_sound = StaticSoundData::from_cursor(Cursor::new(WINNING_MP3.to_vec()))?;
+    let losing_sound = StaticSoundData::from_cursor(Cursor::new(LOSING_MP3.to_vec()))?;
+
+    let mut game = FlappyGame::new(board.cols, board.rows);
+
+    'game: loop {
+        execute!(stdout, terminal::Clear(terminal::ClearType::All))?;
+        board.draw_title(stdout, "CYBER FLAPPY")?;
+        board.draw_grid(stdout)?;
+
+        board.fill_cell(stdout, game.player_pos(), Color::Cyan)?;
+        board.draw_all_pipes(stdout, &game.pipes)?;
+        board.draw_flappy_info(stdout, game.score)?;
+        board.draw_status(stdout, "Press SPACE to jump!", Color::Yellow)?;
+
+        let mut last_tick = Instant::now();
+
+        loop {
+            let tick_duration = Duration::from_millis(game.tick_ms());
+            let remaining = tick_duration.saturating_sub(last_tick.elapsed());
+
+            if event::poll(remaining)? {
+                if let Event::Key(key) = event::read()? {
+                    if key.kind == KeyEventKind::Press {
+                        match key.code {
+                            KeyCode::Char(' ') => {
+                                let old_pos = game.player_pos();
+                                game.jump();
+                                board.clear_cell(stdout, old_pos)?;
+                                board.fill_cell(stdout, game.player_pos(), Color::Cyan)?;
+                            }
+                            KeyCode::Char('q') | KeyCode::Esc => break 'game,
+                            _ => {}
+                        }
+                    }
+                }
+            }
+
+            if last_tick.elapsed() >= tick_duration {
+                last_tick = Instant::now();
+                match game.tick() {
+                    FlappyMoveResult::Moved {
+                        old_player,
+                        old_pipe_positions,
+                    } => {
+                        board.clear_cell(stdout, old_player)?;
+                        
+                        for old_x in old_pipe_positions {
+                            if old_x < board.cols {
+                                board.clear_pipe_column(stdout, old_x)?;
+                            }
+                        }
+                        
+                        board.draw_all_pipes(stdout, &game.pipes)?;
+                        board.fill_cell(stdout, game.player_pos(), Color::Cyan)?;
+                    }
+                    FlappyMoveResult::ScoredPoint {
+                        old_player,
+                        old_pipe_positions,
+                    } => {
+                        board.clear_cell(stdout, old_player)?;
+                        
+                        for old_x in old_pipe_positions {
+                            if old_x < board.cols {
+                                board.clear_pipe_column(stdout, old_x)?;
+                            }
+                        }
+                        
+                        board.draw_all_pipes(stdout, &game.pipes)?;
+                        board.fill_cell(stdout, game.player_pos(), Color::Cyan)?;
+                        manager.play(score_sound.clone())?;
+                        board.draw_flappy_info(stdout, game.score)?;
+                    }
+                    FlappyMoveResult::Collision => {
+                        board.fill_cell(stdout, game.player_pos(), Color::Red)?;
+                        manager.play(losing_sound.clone())?;
+                        let msg = format!(
+                            "Game Over! Score: {} | (R)estart or (Q)uit",
+                            game.score
+                        );
+                        board.draw_status(stdout, &msg, Color::Red)?;
+                        match input::read_post_round()? {
+                            PostRoundInput::PlayAgain => {
+                                game.restart();
+                                continue 'game;
+                            }
+                            PostRoundInput::Quit => break 'game,
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(())
+}
+

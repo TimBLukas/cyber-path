@@ -254,4 +254,50 @@ impl Board {
         stdout.flush()?;
         Ok(())
     }
+
+    pub fn draw_flappy_info(&self, stdout: &mut Stdout, score: u32) -> Result<()> {
+        let info = format!("Score: {}  |  Q to quit", score);
+        let row = self.status_row() + 1;
+        queue!(
+            stdout,
+            cursor::MoveTo(0, row),
+            style::Print(" ".repeat(self.term_w as usize)),
+            cursor::MoveTo(self.term_w.saturating_sub(info.len() as u16) / 2, row),
+            style::PrintStyledContent(info.with(Color::DarkGrey))
+        )?;
+        stdout.flush()?;
+        Ok(())
+    }
+
+    pub fn draw_all_pipes(&self, stdout: &mut Stdout, pipes: &[crate::flappy::Pipe]) -> Result<()> {
+        for x in 0..self.cols {
+            let mut has_pipe = false;
+            let mut gap_start = 0;
+            let mut gap_end = self.rows;
+            
+            for pipe in pipes {
+                if pipe.x == x {
+                    has_pipe = true;
+                    gap_start = pipe.gap_y.saturating_sub(pipe.gap_size / 2);
+                    gap_end = pipe.gap_y + pipe.gap_size / 2;
+                    break;
+                }
+            }
+            
+            for y in 0..self.rows {
+                let pos = Position::new(x, y);
+                if has_pipe && (y < gap_start || y > gap_end) {
+                    self.fill_cell(stdout, pos, Color::Magenta)?;
+                }
+            }
+        }
+        Ok(())
+    }
+
+    pub fn clear_pipe_column(&self, stdout: &mut Stdout, x: u16) -> Result<()> {
+        for y in 0..self.rows {
+            self.clear_cell(stdout, Position::new(x, y))?;
+        }
+        Ok(())
+    }
 }

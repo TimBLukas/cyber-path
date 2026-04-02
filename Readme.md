@@ -1,60 +1,108 @@
 # Cyber Path – Terminal Games in Rust
 
-Several terminal-based games written in Rust.
+A collection of retro-style terminal-based games written in Rust, featuring cyberpunk aesthetics and increasing difficulty.
 
-games:
-- The player is shown a path on a rectangular board. After a short preview phase, the path disappears and must be reproduced from memory. Every round the path gets longer!
-- The player is chased by an object an has to avoid it, the object gets better at tracking the player ervery round.
-- Snake: The classic snake game
+## Game Modes
 
-features:
-- different game modes
-- increasing difficulty
-- sounds
+### 1. Path Mode (Memory Challenge)
 
----
+Watch a path, then recreate it from memory. Paths get longer each round!
 
-## Screenshots
+```
+                              CYBER PATH
+┌────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┐
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+├────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┤
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+├────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┤
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+└────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┘
 
-<p align="center">
-  <img src="assets/input-phase.png" alt="Preview phase" width="600">
-  <br><em>Input - phase: Waiting for an input!</em>
-</p>
+                     Round 1  |  3 moves  |  Q to quit
+                            Watch the path...
+```
 
-<p align="center">
-  <img src="assets/correct-path.png" alt="Input phase" width="600">
-  <br><em>Correct Path – Path was recreated correct!</em>
-</p>
+### 2. Chase Mode (Evasion)
 
-<p align="center">
-  <img src="assets/wrong-path.png" alt="Input phase" width="600">
-  <br><em>Wrong Path - Path was recreated incorrectly!</em>
-</p>
+Flee from a pursuing bot that gets faster and smarter each round!
+
+```
+                              CYBER CHASE
+┌────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┐
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+├────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┤
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+├────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┤
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+└────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┘
+
+              Flee from the bot! Survive 15 moves | WASD / Arrow keys
+                Round 1  |  0/15  survived  |  Bot speed: 1  |  Q to quit
+```
+
+### 3. Snake Mode (Classic)
+
+Collect coins, grow your snake, and avoid crashing!
+
+```
+                              CYBER SNAKE
+┌────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┐
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+├────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┤
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+├────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┤
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+└────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┘
+
+                       Score: 0  |  Level: 1  |  Q to quit
+                         Collect coins! WASD / Arrow keys
+```
+
+### 4. Flappy Mode (Reaction)
+
+Navigate through moving pipes by jumping at the right time!
+
+```
+                              CYBER FLAPPY
+┌────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┐
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+├────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┤
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+├────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┼────┤
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+│    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │    │
+└────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┘
+
+                           Score: 0  |  Q to quit
+                           Press SPACE to jump!
+```
+
 ---
 
 ## Features
 
 - Grid-based board rendered with Unicode box-drawing characters
-- Configurable board size and difficulty
-- Timed preview phase
-- Keyboard-controlled movement
-- Immediate validation of player input
-- Clean terminal rendering using alternate screen buffer
-- Sounds for bot movement, player movement, winning and losing
-
----
-
-## Gameplay
-
-1. A random path is generated on the board.
-2. The path is displayed for a fixed preview duration.
-3. The board is cleared.
-4. The player must recreate the exact path using keyboard controls.
-5. The game ends on success or first incorrect move.
+- Four game modes with different gameplay mechanics
+- Progressive difficulty scaling
+- Sound effects (movement, winning, losing)
+- Terminal rendering using alternate screen buffer
 
 ---
 
 ## Controls
+
+### Path, Chase & Snake Modes
 
 | Key              | Action     |
 | ---------------- | ---------- |
@@ -65,6 +113,14 @@ features:
 | Q / Esc          | Quit game  |
 | R (after defeat) | Restart    |
 
+### Flappy Mode
+
+| Key              | Action    |
+| ---------------- | --------- |
+| Space            | Jump      |
+| Q / Esc          | Quit game |
+| R (after defeat) | Restart   |
+
 ---
 
 ## Installation
@@ -72,18 +128,29 @@ features:
 ### Prerequisites
 
 - Rust (stable toolchain recommended)
-  Install via: [https://rustup.rs](https://rustup.rs)
+- Install via: [https://rustup.rs](https://rustup.rs)
 
-### Build
+### Build & Run
 
 ```bash
+# Clone the repository
+git clone <repository-url>
+cd cyber-path
+
+# Build release version
 cargo build --release
-```
 
-### Run
+# Run with default mode (Path)
+cargo run --release
 
-```bash
-cargo run
+# Run specific game mode
+cargo run --release -- --mode path
+cargo run --release -- --mode chase
+cargo run --release -- --mode snake
+cargo run --release -- --mode flappy
+
+# View help
+cargo run -- --help
 ```
 
 ---
@@ -92,81 +159,93 @@ cargo run
 
 ```
 src/
- ├── main.rs        # Entry point
- ├── input.rs       # Rendering logic
- ├── game.rs        # Game state and logic
- ├── models.rs        # Path generation
- └── ui.rs       # Keyboard handling
+ ├── main.rs        # Entry point and game loop management
+ ├── game.rs        # Path mode: memory challenge logic
+ ├── chase.rs       # Chase mode: evasion gameplay
+ ├── snake.rs       # Snake mode: classic snake implementation
+ ├── flappy.rs      # Flappy mode: obstacle avoidance
+ ├── models.rs      # Core data structures (Position, Direction)
+ ├── ui.rs          # Terminal rendering and UI components
+ └── input.rs       # Keyboard input handling
 ```
 
 ---
 
-## Architecture Overview
+## Gameplay Details
 
-- **Rendering Layer**: Responsible for terminal drawing and layout.
-- **Game Logic Layer**: Manages state transitions (Preview → Input → Result).
-- **Path Generator**: Produces valid, non-intersecting paths.
-- **Input Handler**: Maps keyboard events to movement commands.
+### Path Mode
 
-Separation of concerns ensures maintainability and testability.
+1. A random path is generated and displayed
+2. Path is shown for a preview duration (shorter each round)
+3. Player must recreate the exact path from memory
+4. Each successful round adds more moves to memorize
+
+### Chase Mode
+
+1. Player and bot spawn at opposite corners
+2. Player must survive a set number of moves
+3. Bot pursues using pathfinding (with 25% random moves)
+4. Each round increases required survival moves and bot speed
+
+### Snake Mode
+
+1. Control a snake that grows by collecting coins
+2. Avoid walls and your own body
+3. Speed increases with score
+4. Level up every 5 coins collected
+
+### Flappy Mode
+
+1. Player auto-falls due to gravity
+2. Press space to jump upward
+3. Navigate through gaps in moving pipes
+4. Pipes spawn continuously and move left
+5. Score increases for each pipe passed
 
 ---
 
-## Configuration
+## Testing
 
-Game parameters can be adjusted via constants or configuration module:
+Run the full test suite:
 
-- Board width and height
-- Path length
-- Preview duration
-- Difficulty scaling
+```bash
+cargo test
+```
+
+All game modes include comprehensive unit tests covering:
+
+- Game state transitions
+- Movement validation
+- Collision detection
+- Score/round progression
+- Boundary conditions
 
 ---
 
 ## Dependencies
 
 ```toml
-crossterm = "0.27"
-rand = "0.8"
-anyhow = "1.0"
+anyhow = "1.0.102"
+clap = { version = "4.5.60", features = ["derive"] }
+crossterm = "0.29.0"
+rand = "0.10.0"
+kira = "0.12.0"
 ```
 
 ---
 
-## Error Handling
+## Configuration
 
-- Uses `anyhow::Result` for ergonomic error propagation.
-- Terminal state is restored on exit.
-- Graceful shutdown on panic recommended (e.g., `ctrlc` handler).
+Game parameters are tuned for balanced gameplay but can be adjusted in the source:
 
----
-
-## Testing
-
-Unit tests should cover:
-
-- Path validity (bounds, no unintended intersections)
-- Game state transitions
-- Input validation logic
-
-Run tests:
-
-```bash
-cargo test
-```
-
----
-
-## Future Improvements
-
-- Score system
-- Increasing difficulty levels
-- Persistent high scores
-- Color highlighting
-- New Gamemode (chase / get chased)
+- **Board size**: Automatically calculated based on terminal dimensions (5-16 cols, 4-10 rows)
+- **Path mode**: Preview duration and step delay decrease with rounds
+- **Chase mode**: Bot speed formula: `1 + (round-1) / 3`
+- **Snake mode**: Tick speed formula: `300ms - (score * 10ms)`, min 100ms
+- **Flappy mode**: Tick speed formula: `150ms - (score * 5ms)`, min 80ms
 
 ---
 
 ## License
 
-MIT License.
+MIT License

@@ -60,7 +60,7 @@ impl ChaseGame {
     }
 
     pub fn bot_step_size(&self) -> u32 {
-        1 + (self.round - 1) / 2
+        1 + (self.round - 1) / 3
     }
 
     pub fn move_player(&mut self, dir: Direction) -> ChaseMoveResult {
@@ -109,7 +109,7 @@ impl ChaseGame {
             if self.bot_pos == self.player_pos {
                 break;
             }
-            if let Some(dir) = self.best_bot_direction() {
+            if let Some(dir) = self.bot_direction() {
                 if let Some(new_pos) = self.bot_pos.neighbor(dir) {
                     self.bot_pos = new_pos;
                 }
@@ -117,8 +117,11 @@ impl ChaseGame {
         }
     }
 
-    fn best_bot_direction(&self) -> Option<Direction> {
-        ALL_DIRS
+    fn bot_direction(&self) -> Option<Direction> {
+        let mut rng = rand::rng();
+        let mistake_chance = 0.25;
+        
+        let valid_moves: Vec<_> = ALL_DIRS
             .iter()
             .filter_map(|&dir| {
                 self.bot_pos
@@ -126,8 +129,17 @@ impl ChaseGame {
                     .filter(|p| p.x < self.cols && p.y < self.rows)
                     .map(|p| (dir, p.manhattan_distance(self.player_pos)))
             })
-            .min_by_key(|&(_, dist)| dist)
-            .map(|(dir, _)| dir)
+            .collect();
+
+        if valid_moves.is_empty() {
+            return None;
+        }
+
+        if rand::random::<f32>() < mistake_chance {
+            valid_moves.iter().choose(&mut rng).map(|(dir, _)| *dir)
+        } else {
+            valid_moves.iter().min_by_key(|&(_, dist)| dist).map(|(dir, _)| *dir)
+        }
     }
 
     pub fn advance_round(&mut self) {
@@ -163,7 +175,9 @@ mod tests {
             moves_survived: 0,
         };
         let old_dist = game.bot_pos.manhattan_distance(game.player_pos);
-        game.move_bot();
+        for _ in 0..10 {
+            game.move_bot();
+        }
         let new_dist = game.bot_pos.manhattan_distance(game.player_pos);
         assert!(new_dist < old_dist);
     }
@@ -171,12 +185,12 @@ mod tests {
     #[test]
     fn bot_step_size_increases() {
         let game1 = ChaseGame::new(10, 10);
-        let mut game3 = ChaseGame::new(10, 10);
-        game3.round = 3;
-        let mut game5 = ChaseGame::new(10, 10);
-        game5.round = 5;
-        assert!(game1.bot_step_size() < game3.bot_step_size());
-        assert!(game3.bot_step_size() < game5.bot_step_size());
+        let mut game4 = ChaseGame::new(10, 10);
+        game4.round = 4;
+        let mut game7 = ChaseGame::new(10, 10);
+        game7.round = 7;
+        assert!(game1.bot_step_size() < game4.bot_step_size());
+        assert!(game4.bot_step_size() < game7.bot_step_size());
     }
 
     #[test]
